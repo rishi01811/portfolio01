@@ -97,10 +97,10 @@ function WelcomeScreen({ onComplete }: { onComplete: () => void }) {
   useEffect(() => { document.body.style.overflow = "hidden"; return () => { document.body.style.overflow = ""; }; }, []);
   useEffect(() => {
     if (index < welcomeGreetings.length - 1) {
-      const timer = setTimeout(() => setIndex(i => i + 1), 400);
+      const timer = setTimeout(() => setIndex(i => i + 1), 600);
       return () => clearTimeout(timer);
     }
-    const timer = setTimeout(() => { setExiting(true); setTimeout(onComplete, 700); }, 400);
+    const timer = setTimeout(() => { setExiting(true); setTimeout(onComplete, 700); }, 600);
     return () => clearTimeout(timer);
   }, [index, onComplete]);
   return <motion.div className="welcome-screen" animate={exiting ? { opacity: 0, scale: 1.15 } : { opacity: 1, scale: 1 }} transition={{ duration: 0.65, ease: [.22, 1, .36, 1] }}><AnimatePresence mode="wait"><motion.span key={index} className="welcome-greeting" initial={{ opacity: 0, y: 30, scale: 0.92 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -20, scale: 0.96 }} transition={{ duration: 0.35, ease: [.22, 1, .36, 1] }}>{welcomeGreetings[index]}</motion.span></AnimatePresence></motion.div>;

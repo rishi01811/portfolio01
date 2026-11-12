@@ -67,7 +67,7 @@ function Tools({ paused }: { paused: boolean }) {
   const [index, setIndex] = useState(0);
   const [hovered, setHovered] = useState(false);
   const reduceMotion = useReducedMotion();
-  useEffect(() => { if (paused || hovered || reduceMotion) return; const timer = setInterval(() => setIndex(value => (value + 1) % toolkit.length), 3500); return () => clearInterval(timer); }, [paused, hovered, reduceMotion]);
+  useEffect(() => { if (paused || hovered || reduceMotion) return; const timer = setInterval(() => setIndex(value => (value + 1) % toolkit.length), 2500); return () => clearInterval(timer); }, [paused, hovered, reduceMotion]);
   const move = (step: number) => setIndex(value => (value + step + toolkit.length) % toolkit.length);
   return <section id="tools" className="section tools-section"><SectionHeading title="Tools I reach for" anchor="tools" /><div className="tools-playground" onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} onFocusCapture={() => setHovered(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setHovered(false); }}><div className="tool-wheel"><button className="wheel-arrow wheel-up" onClick={() => move(-1)} aria-label="Previous tool"><ChevronUp size={17} /></button><div className="tool-viewport">{toolkit.map(({ name, icon: Icon, color }, i) => { const offset = ((i - index + toolkit.length + 3) % toolkit.length) - 3; return <motion.button key={name} className={`tool-pill ${offset === 0 ? "selected" : ""}`} animate={{ y: offset * 59, scale: 1 - Math.abs(offset) * .12, opacity: Math.abs(offset) > 2 ? 0 : Math.max(.12, 1 - Math.abs(offset) * .43) }} transition={{ type: "spring", stiffness: 180, damping: 24 }} onClick={() => setIndex(i)} tabIndex={Math.abs(offset) > 1 ? -1 : 0} aria-pressed={offset === 0} style={{ zIndex: 4 - Math.abs(offset) }}><Icon size={22} style={{ color }} />{name}</motion.button>; })}</div><button className="wheel-arrow wheel-down" onClick={() => move(1)} aria-label="Next tool"><ChevronDown size={17} /></button></div><div className="tool-story"><p>I <AnimatePresence mode="wait"><motion.span key={index} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: .25 }}>{toolkit[index].verb}</motion.span></AnimatePresence><br />with curiosity<span className="serif-period">.</span></p><span>{toolkit[index].detail}</span><div className="tool-pagination" aria-label="Choose a tool">{toolkit.map((tool, i) => <button key={tool.name} aria-label={`Show ${tool.name}`} aria-pressed={index === i} onClick={() => setIndex(i)} />)}</div></div></div><div className="learning-note"><Sparkles size={15} /><p>Currently exploring <strong>computer vision, practical AI,</strong> and better ways to build for the web.</p></div></section>;
 }
@@ -89,9 +89,27 @@ function Footer() {
   return <footer className="site-footer"><div><a href="#home" className="footer-wordmark">rishi<span>✳</span></a><span>Made with curiosity. © {new Date().getFullYear()} Rishi.</span></div><a href="#home" className="back-to-top">Back to top<ArrowUp size={14} /></a><div className="footer-note"><span>Based in India. Building for everywhere.</span><Heart size={11} /></div></footer>;
 }
 
+const welcomeGreetings = ["Hello", "నమస్కారం", "வணக்கம்", "नमस्ते", "Bonjour", "Hola", "こんにちは", "안녕하세요", "مرحبا", "Hello"];
+
+function WelcomeScreen({ onComplete }: { onComplete: () => void }) {
+  const [index, setIndex] = useState(0);
+  const [exiting, setExiting] = useState(false);
+  useEffect(() => { document.body.style.overflow = "hidden"; return () => { document.body.style.overflow = ""; }; }, []);
+  useEffect(() => {
+    if (index < welcomeGreetings.length - 1) {
+      const timer = setTimeout(() => setIndex(i => i + 1), 400);
+      return () => clearTimeout(timer);
+    }
+    const timer = setTimeout(() => { setExiting(true); setTimeout(onComplete, 700); }, 400);
+    return () => clearTimeout(timer);
+  }, [index, onComplete]);
+  return <motion.div className="welcome-screen" animate={exiting ? { opacity: 0, scale: 1.15 } : { opacity: 1, scale: 1 }} transition={{ duration: 0.65, ease: [.22, 1, .36, 1] }}><AnimatePresence mode="wait"><motion.span key={index} className="welcome-greeting" initial={{ opacity: 0, y: 30, scale: 0.92 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -20, scale: 0.96 }} transition={{ duration: 0.35, ease: [.22, 1, .36, 1] }}>{welcomeGreetings[index]}</motion.span></AnimatePresence></motion.div>;
+}
+
 export function Portfolio() {
   const [theme, setTheme] = useState("dark");
   const [paused, setPaused] = useState(false);
+  const [welcomed, setWelcomed] = useState(false);
   const frame = useRef<HTMLDivElement>(null);
-  return <MotionConfig reducedMotion={paused ? "always" : "user"}><div ref={frame} className="portfolio-world" data-theme={theme} data-paused={paused} onPointerMove={event => { frame.current?.style.setProperty("--pointer-x", `${event.clientX}px`); frame.current?.style.setProperty("--pointer-y", `${event.clientY}px`); }}><a className="skip-link" href="#main">Skip to content</a><div className="page-gutters" aria-hidden="true"><div /><div /></div><div className="portfolio-frame"><Header theme={theme} onTheme={() => setTheme(value => value === "dark" ? "light" : "dark")} paused={paused} onPause={() => setPaused(value => !value)} /><main id="main" className="page-content"><Introduction /><Reveal className="personal-widgets"><DiscordStatus /><LocalClock /></Reveal><Tools paused={paused} /><Projects /><CurrentlyBuilding /><ActivitySection /><Contact /><Footer /></main><a href="#about" className="edge-label" aria-label="Scroll to about">A WORK IN PROGRESS<ArrowDown size={12} /></a></div></div></MotionConfig>;
+  return <MotionConfig reducedMotion={paused ? "always" : "user"}><div ref={frame} className="portfolio-world" data-theme={theme} data-paused={paused} onPointerMove={event => { frame.current?.style.setProperty("--pointer-x", `${event.clientX}px`); frame.current?.style.setProperty("--pointer-y", `${event.clientY}px`); }}>{!welcomed ? <WelcomeScreen onComplete={() => setWelcomed(true)} /> : <><a className="skip-link" href="#main">Skip to content</a><div className="page-gutters" aria-hidden="true"><div /><div /></div><div className="portfolio-frame"><Header theme={theme} onTheme={() => setTheme(value => value === "dark" ? "light" : "dark")} paused={paused} onPause={() => setPaused(value => !value)} /><main id="main" className="page-content"><Introduction /><Reveal className="personal-widgets"><DiscordStatus /><LocalClock /></Reveal><Tools paused={paused} /><Projects /><CurrentlyBuilding /><ActivitySection /><Contact /><Footer /></main><a href="#about" className="edge-label" aria-label="Scroll to about">A WORK IN PROGRESS<ArrowDown size={12} /></a></div></>}</div></MotionConfig>;
 }

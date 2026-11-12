@@ -2,12 +2,12 @@
 
 import { useRef, useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, ArrowUpRight, BrainCircuit, Fingerprint, Heart, List, Recycle, Sparkles, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, BrainCircuit, FileSearch, GraduationCap, Heart, HeartPulse, List, Phone, Sparkles, X } from "lucide-react";
 import { projects, type Project } from "@/data/portfolio";
 import { ProjectVisual } from "./project-visual";
 import { ExternalLink, SectionHeading, Tags } from "./ui";
 
-const projectIcons = { saathi: Heart, plant: BrainCircuit, waste: Recycle, geo: Fingerprint };
+const projectIcons = { saathi: Heart, plant: BrainCircuit, voice: Phone, rag: FileSearch, disease: HeartPulse, eduflow: GraduationCap };
 
 function ProjectDialog({ project, onClose }: { project: Project | null; onClose: () => void }) {
   const ref = useRef<HTMLDialogElement>(null);
